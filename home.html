@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Recommendation System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        label, input {
+            margin: 5px 0;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #recommendations {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #recommendations ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #recommendations ul li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Food Recommendation System</h1>
+    <form id="recommendForm" action="/recommend" method="POST">
+        <label for="userId">Enter User ID:</label>
+        <input type="text" id="userId" name="userId" required>
+        <input type="submit" value="Recommend">
+    </form>
+    <div id="recommendations"></div>
+
+    <script>
+        document.getElementById("recommendForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var userId = document.getElementById("userId").value;
+            console.log("Sending user_id:", userId);  // Log user ID being sent
+
+            fetch('/recommend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_id: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var recommendationsDiv = document.getElementById("recommendations");
+                recommendationsDiv.innerHTML = '';
+
+                if (data.recommendations.length > 0) {
+                    var ul = document.createElement('ul');
+                    JSON.parse(data.recommendations).forEach(function(recommendation) {
+                        var li = document.createElement('li');
+                        li.textContent = recommendation.product_name;
+                        ul.appendChild(li);
+                    });
+                    recommendationsDiv.appendChild(ul);
+                } else {
+                    recommendationsDiv.textContent = "No recommendations found.";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                var recommendationsDiv = document.getElementById("recommendations");
+                recommendationsDiv.innerHTML = "An error occurred while fetching recommendations.";
+            });
+        });
+    </script>
+</body>
+</html>
